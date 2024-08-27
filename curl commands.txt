@@ -1,0 +1,74 @@
+##########################################################################
+ШАБЛОНЫ ЗАПРОСОВ
+##########################################################################
+
+# Регистрация
+curl -X POST "http://localhost:8000/register" \
+    -H "Content-Type: application/json" \
+    -d '{"username": "<???>", "password": "<???>"}'
+
+# Получение токена
+curl -X POST "http://localhost:8000/token" \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "username=<???>&password=<???>"
+
+# Добавление заметки
+curl -X POST "http://localhost:8000/notes" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <token>" \
+-d '{
+    "title": "<???>",
+    "content": "<???>"
+}'
+
+# Получение заметок
+curl -X GET "http://localhost:8000/notes" \
+-H "Authorization: Bearer <token>"
+
+
+##########################################################################
+ПРИМЕРЫ ЗАПРОСОВ
+##########################################################################
+
+#Регистрация
+curl -s -X POST "http://localhost:8000/register" \
+    -H "Content-Type: application/json" \
+    -d '{"username": "<curl>", "password": "<curl1>"}' | \
+    python -c "import sys, json; print(json.dumps(json.load(sys.stdin), ensure_ascii=False, indent=4))"
+
+# Получение токена
+curl -s -X POST "http://localhost:8000/token" \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "username=user1&password=pass1" | \
+	python -c "import sys, json; print(json.dumps(json.load(sys.stdin), ensure_ascii=False, indent=4))"
+
+# Получение токена с записью в переменную <для удобства использования ;)>
+TOKEN=$(curl -s -X POST "http://localhost:8000/token" \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "username=user1&password=pass1" | \
+    grep -o '"access_token":"[^"]*' | grep -o '[^"]*$')
+
+# Добавление заметки
+curl -s -X POST "http://localhost:8000/notes" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $TOKEN" \
+    -d '{
+        "title": "<CURL>",
+        "content": "<Эта заметка отправлена с помощью CURL>"
+    }' | \
+        python -c "import sys, json; print(json.dumps(json.load(sys.stdin), ensure_ascii=False, indent=4))"
+
+# Добавление заметки с ошибками
+curl -s -X POST "http://localhost:8000/notes" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $TOKEN" \
+    -d '{
+        "title": "<CURL>",
+        "content": "<Эта замитка отпровлина с помащью CURL>"
+    }' | \
+    python -c "import sys, json; print(json.dumps(json.load(sys.stdin), ensure_ascii=False, indent=4))"
+
+# Получение заметок
+curl -s -X GET "http://localhost:8000/notes" \
+    -H "Authorization: Bearer $TOKEN" | \
+    python -c "import sys, json; print(json.dumps(json.load(sys.stdin), ensure_ascii=False, indent=4))"
